@@ -11,3 +11,9 @@ node_modules/
 backend/models/
 backend/voice_cache/
 venv/
+# Internal system prompt
+backend/docs/
+backend/data/CONSIVA_AI_CHATBOT_SYSTEM_PROMPT.pdf
+
+# Generated scraper output
+consiva_scraped_data.json
