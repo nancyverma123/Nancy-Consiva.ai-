@@ -1,0 +1,13 @@
+__pycache__/
+*.pyc
+.env
+backend/.env
+backend/*.db
+backend/venv/
+backend/.venv/
+node_modules/
+.DS_Store
+*.log
+backend/models/
+backend/voice_cache/
+venv/

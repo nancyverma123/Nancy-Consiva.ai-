@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Consiva Assistant</title>
+<meta name="description" content="Get instant, clear answers on DPDP compliance, consent management and data privacy from Consiva's AI assistant, by text or voice." />
+<meta name="theme-color" content="#F1F5FF" />
+<link rel="icon" href="https://consiva.ai/assets/images/logo/favicon.png" sizes="32x32" type="image/png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <linearGradient id="shieldGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#6366F1" />
+        <stop offset="1" stop-color="#06B6D4" />
+      </linearGradient>
+      <symbol id="consiva-mark" viewBox="0 0 32 36">
+        <path d="M16 1.5 29 6.3v10.2c0 8.3-5.5 15.4-13 18-7.5-2.6-13-9.7-13-18V6.3L16 1.5Z" fill="url(#shieldGrad)" />
+        <path d="M16 5.2 25.6 8.8v7.7c0 6.4-4 11.9-9.6 14.1-5.6-2.2-9.6-7.7-9.6-14.1V8.8L16 5.2Z" fill="#fff" fill-opacity=".92" />
+        <circle cx="16" cy="17.5" r="5.2" fill="url(#shieldGrad)" />
+        <path d="m13.6 17.6 1.7 1.7 3.2-3.4" fill="none" stroke="#fff" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" />
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="app-shell">
+    <!-- Sidebar: history -->
+    <aside class="sidebar" id="sidebar" aria-label="Conversations">
+      <div class="sidebar-header">
+        <a class="brand" href="https://consiva.ai/" target="_blank" rel="noopener">
+          <svg class="brand-mark" aria-hidden="true"><use href="#consiva-mark" /></svg>
+          <span class="brand-name">Consiva<span>.ai</span></span>
+        </a>
+        <button id="sidebarClose" class="icon-btn ghost mobile-only" type="button" aria-label="Close conversations">
+          <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+        </button>
+      </div>
+
+      <button id="newChatBtn" class="new-chat-btn" type="button">
+        <svg class="icon" aria-hidden="true"><use href="#i-plus" /></svg>
+        New conversation
+      </button>
+
+      <nav class="history" aria-label="Conversation history">
+        <ul class="history-list" id="historyList"></ul>
+        <p class="history-empty" id="historyEmpty">Your conversations will appear here.</p>
+      </nav>
+
+      <!-- TEMPORARY testing aid: only shown when the backend runs with ENVIRONMENT=development -->
+      <section class="dev-panel" id="devPanel" hidden aria-label="Testing tools">
+        <div class="dev-panel-head">
+          <span class="dev-badge">Testing</span>
+          <span class="dev-title">Voice limits today</span>
+        </div>
+        <div class="dev-meter">
+          <div class="dev-meter-row"><span>You</span><span id="devUserUsage">–</span></div>
+          <div class="dev-bar"><i id="devUserBar"></i></div>
+          <div class="dev-meter-row"><span>All users</span><span id="devGlobalUsage">–</span></div>
+          <div class="dev-bar"><i id="devGlobalBar"></i></div>
+        </div>
+        <button type="button" id="devResetBtn" class="dev-reset-btn">
+          <svg class="icon sm" aria-hidden="true"><use href="#i-reset" /></svg>
+          Reset voice limits
+        </button>
+      </section>
+
+      <div class="sidebar-footer">
+        <div id="userStatus" class="user-status">Guest session</div>
+        <a class="footer-link" href="https://consiva.ai/" target="_blank" rel="noopener">
+          consiva.ai
+          <svg class="icon sm" aria-hidden="true"><use href="#i-external" /></svg>
+        </a>
+      </div>
+    </aside>
+    <div class="sidebar-scrim" id="sidebarScrim" hidden></div>
+
+    <!-- Main chat area -->
+    <main class="chat-main">
+      <header class="chat-header">
+        <button id="sidebarToggle" class="icon-btn ghost mobile-only" type="button" aria-label="Show conversations">
+          <svg class="icon" aria-hidden="true"><use href="#i-menu" /></svg>
+        </button>
+        <div class="header-title">
+          <h1>Consiva Assistant</h1>
+          <p><span class="live-dot" aria-hidden="true"></span>Online · Your DPDP compliance expert</p>
+        </div>
+        <div class="header-controls">
+          <label class="select-wrap" title="Response language">
+            <svg class="icon sm" aria-hidden="true"><use href="#i-globe" /></svg>
+            <span class="sr-only">Response language</span>
+            <select id="languageSelect">
+              <option value="auto">Auto</option>
+              <option value="en">English</option>
+              <option value="hi">हिन्दी</option>
+              <option value="ar">العربية</option>
+              <option value="es">Español</option>
+              <option value="fr">Français</option>
+              <option value="de">Deutsch</option>
+              <option value="pt">Português</option>
+              <option value="zh-cn">中文</option>
+            </select>
+            <svg class="icon sm chevron" aria-hidden="true"><use href="#i-chevron-down" /></svg>
+          </label>
+          <button id="headerCallBtn" class="call-pill" type="button">
+            <svg class="icon sm" aria-hidden="true"><use href="#i-phone" /></svg>
+            <span>Talk</span>
+          </button>
+        </div>
+      </header>
+
+      <section class="chat-window" id="chatWindow" aria-live="polite" aria-label="Conversation"></section>
+
+      <div class="typing-indicator" id="typingIndicator" hidden>
+        <svg class="avatar-mark" aria-hidden="true"><use href="#consiva-mark" /></svg>
+        <span class="typing-label">Thinking<span class="typing-dots"><i></i><i></i><i></i></span></span>
+      </div>
+
+      <div class="composer-wrap">
+        <form class="composer" id="composerForm">
+          <textarea
+            id="messageInput"
+            placeholder="Ask anything about DPDP compliance…"
+            rows="1"
+            maxlength="4000"
+            aria-label="Message"
+            dir="auto"
+          ></textarea>
+          <div class="composer-actions">
+            <button type="button" id="micBtn" class="icon-btn mic-btn" title="Start a voice conversation" aria-label="Start a voice conversation" aria-pressed="false">
+              <svg class="icon" aria-hidden="true"><use href="#i-waveform" /></svg>
+            </button>
+            <button type="submit" id="sendBtn" class="send-btn" aria-label="Send message">
+              <svg class="icon" aria-hidden="true"><use href="#i-arrow-up" /></svg>
+            </button>
+          </div>
+        </form>
+        <p class="disclaimer">AI answers are for guidance. For decisions specific to your business, <a href="https://consiva.ai/" target="_blank" rel="noopener">talk to our team</a>.</p>
+      </div>
+
+      <!-- Hands-free voice call -->
+      <section class="voice-call" id="voicePanel" hidden aria-label="Voice conversation" aria-live="polite">
+        <div class="call-top">
+          <div class="call-id">
+            <svg class="call-mark" aria-hidden="true"><use href="#consiva-mark" /></svg>
+            <div>
+              <div class="call-name">Consiva Assistant</div>
+              <div class="call-timer" id="callTimer">00:00</div>
+            </div>
+          </div>
+          <button type="button" id="voiceMinimizeBtn" class="icon-btn on-dark" aria-label="End voice conversation">
+            <svg class="icon" aria-hidden="true"><use href="#i-x" /></svg>
+          </button>
+        </div>
+
+        <div class="call-stage">
+          <button type="button" class="voice-orb" id="voiceOrb" data-state="idle" aria-label="Tap to interrupt while Consiva is speaking">
+            <canvas id="voiceCanvas" aria-hidden="true"></canvas>
+          </button>
+          <div class="voice-status" id="voiceStatus">Connecting…</div>
+          <div class="call-captions">
+            <p class="caption user" id="voiceTranscript" dir="auto"></p>
+            <p class="caption bot" id="voiceReply" dir="auto"></p>
+          </div>
+        </div>
+
+        <div class="call-controls">
+          <button type="button" id="voiceMuteBtn" class="call-btn" aria-pressed="false">
+            <span class="call-btn-circle"><svg class="icon" aria-hidden="true"><use href="#i-mic" /></svg></span>
+            <span class="call-btn-label">Mute</span>
+          </button>
+          <button type="button" id="voiceEndBtn" class="call-btn end">
+            <span class="call-btn-circle"><svg class="icon" aria-hidden="true"><use href="#i-phone-off" /></svg></span>
+            <span class="call-btn-label">End</span>
+          </button>
+          <button type="button" id="voiceInterruptBtn" class="call-btn" disabled>
+            <span class="call-btn-circle"><svg class="icon" aria-hidden="true"><use href="#i-skip" /></svg></span>
+            <span class="call-btn-label">Interrupt</span>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <!-- App-styled confirmation dialog (replaces the browser's confirm()) -->
+  <dialog class="modal" id="confirmDialog" aria-labelledby="confirmTitle" aria-describedby="confirmMessage">
+    <form method="dialog" class="modal-card">
+      <div class="modal-icon" id="confirmIcon" aria-hidden="true">
+        <svg class="icon"><use href="#i-trash" /></svg>
+      </div>
+      <h2 class="modal-title" id="confirmTitle">Delete conversation?</h2>
+      <p class="modal-message" id="confirmMessage"></p>
+      <div class="modal-actions">
+        <button class="btn btn-secondary" value="cancel" id="confirmCancel">Cancel</button>
+        <button class="btn btn-danger" value="confirm" id="confirmOk">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Icon set: 24px grid, 1.75 stroke -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" /></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12" /></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10" /></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18" /></symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6" /></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h3.5l1.8 4.5-2.3 1.4a11 11 0 0 0 6.1 6.1l1.4-2.3L20 15.5V19a2 2 0 0 1-2.2 2A17 17 0 0 1 3 6.2 2 2 0 0 1 5 4Z" /></symbol>
+    <symbol id="i-phone-off" viewBox="0 0 24 24"><path d="M3.5 13.2c4.8-4.3 12.2-4.3 17 0l-1.9 2.7-3.4-1.3v-2.3a12 12 0 0 0-6.4 0v2.3l-3.4 1.3-1.9-2.7Z" /></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3" /><path d="M5.5 11a6.5 6.5 0 0 0 13 0M12 17.5V21" /></symbol>
+    <symbol id="i-mic-off" viewBox="0 0 24 24"><path d="M15 9.5V6a3 3 0 0 0-5.7-1.3M9 9v2a3 3 0 0 0 5 2.2M18.5 11a6.5 6.5 0 0 1-1 3.4M5.5 11a6.5 6.5 0 0 0 10.3 5.3M12 17.5V21M3 3l18 18" /></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M6 5v14l9-7-9-7ZM18 5v14" /></symbol>
+    <symbol id="i-waveform" viewBox="0 0 24 24"><path d="M3 12h1.5M7 8v8M10.5 5v14M14 9v6M17.5 7v10M21 12h-.5" /></symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6" /></symbol>
+    <symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" /></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" /></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5ZM15.5 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11" /></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6.5" y="6.5" width="11" height="11" rx="2" /></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2" /><path d="M5 15V5a1 1 0 0 1 1-1h10" /></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" /></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5Z" /><path d="M14 3v5h5M9 13h6M9 17h4" /></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3" /></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4.5h4.5" /></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.5v.01" /></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 11v5.5M12 7.5v.01" /></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M12 7.5v5.5M12 16.5v.01" /></symbol>
+  </svg>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
