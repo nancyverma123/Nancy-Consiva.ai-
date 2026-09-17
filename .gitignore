@@ -17,3 +17,5 @@ backend/data/CONSIVA_AI_CHATBOT_SYSTEM_PROMPT.pdf
 
 # Generated scraper output
 consiva_scraped_data.json
+
+backend/data/consiva_website_scraped.txt

@@ -1,33 +1,28 @@
-import json
+from datetime import datetime, timezone
+from pathlib import Path
 
 from backend.app.services.scraper import extract_page_data
 
 
 url = "https://consiva.ai/"
-
 data = extract_page_data(url )
 
-print("Title:", data["title"])
-print("Heading:", data["heading"])
+output_path = Path(
+    "backend/data/consiva_website_scraped.txt"
+)
 
-print("\nFirst 10 paragraphs:")
-for paragraph in data["paragraphs"][:10]:
-    print("-", paragraph)
+collected_at = datetime.now(timezone.utc).isoformat()
 
-print("\nFirst 20 links:")
-for link in data["links"][:20]:
-    print("-", link["text"], link["url"])
+with output_path.open("w", encoding="utf-8") as file:
+    file.write(f"Source URL: {data['url']}\n")
+    file.write(f"Collected at: {collected_at}\n\n")
 
-with open(
-    "consiva_scraped_data.json",
-    "w",
-    encoding="utf-8"
-) as file:
-    json.dump(
-        data,
-        file,
-        ensure_ascii=False,
-        indent=2
-    )
+    file.write(f"Page title: {data['title']}\n")
+    file.write(f"Main heading: {data['heading']}\n\n")
 
-print("\nData saved to consiva_scraped_data.json")
+    file.write("Website content:\n\n")
+
+    for paragraph in data["paragraphs"]:
+        file.write(paragraph + "\n\n")
+
+print(f"Scraped data saved to: {output_path}")
