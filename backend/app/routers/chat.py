@@ -1,4 +1,5 @@
 import logging
+import traceback
 
 from datetime import datetime, timezone
 
@@ -42,6 +43,7 @@ def chat(
     # The language code is inserted into the system prompt,
     # so only accept known codes.
     requested = (payload.language or "").strip().lower()
+
     language = (
         requested
         if requested in LANGUAGE_NAMES
@@ -128,21 +130,41 @@ def chat(
             str(exc),
         )
 
+        error_trace = traceback.format_exc()
+
+        print("========== LLM/PINECONE ERROR ==========")
+        print(error_trace)
+        print("=========================================")
+
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"DEBUG ERROR: {type(exc).__name__}: {str(exc)}",
+            detail={
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "traceback": error_trace,
+            },
         ) from exc
 
-    except Exception as exc:  # noqa: BLE001
+    except Exception as exc:
         logger.exception(
             "UNEXPECTED CHAT ERROR | type=%s | error=%s",
             type(exc).__name__,
             str(exc),
         )
 
+        error_trace = traceback.format_exc()
+
+        print("========== FULL CHAT TRACEBACK ==========")
+        print(error_trace)
+        print("=========================================")
+
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"DEBUG ERROR: {type(exc).__name__}: {str(exc)}",
+            detail={
+                "error_type": type(exc).__name__,
+                "error": str(exc),
+                "traceback": error_trace,
+            },
         ) from exc
 
     sources = [
