@@ -1,8 +1,7 @@
 (() => {
   "use strict";
 
-  const API_BASE = window.CONSIVA_API_BASE || "http://localhost:8000";
-
+const API_BASE = window.CONSIVA_API_BASE || "https://nancy-consiva-ai.onrender.com";
   const el = {
     sidebar: document.getElementById("sidebar"),
     sidebarToggle: document.getElementById("sidebarToggle"),
