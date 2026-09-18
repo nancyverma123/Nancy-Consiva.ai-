@@ -77,7 +77,7 @@ class Settings(BaseSettings):
     supported_languages: str = "en,hi,es,fr,de,ar"
 
     # CORS
-    allowed_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://localhost:5500,http://127.0.0.1:5500"
+    allowed_origins: str = "https://nancy-consiva-ai-1.onrender.com,http://localhost:3000,http://127.0.0.1:3000,http://localhost:5500,http://127.0.0.1:5500"
     frontend_url: str = "http://localhost:8000"
 
     @property
